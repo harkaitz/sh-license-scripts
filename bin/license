@@ -1,0 +1,137 @@
+#!/bin/sh -e
+##:
+#h: Usage: license [LICENSE|calc] [show|notes|shell|file|long|short|update]
+#h:        license owned
+#h:        license show 
+##:
+license() {
+    local l license
+    ## Get license.
+    case "${1}" in
+        '')
+            license_list
+            return 0
+            ;;
+        'owned')
+            if test -f "${LICENSE_FILE}" && grep -q "${LICENSE_GREP_OWNED}" "${LICENSE_FILE}"; then
+                echo "yes"
+                return 0
+            else
+                echo "no"
+                return 1
+            fi
+            ;;
+        'show')
+            license_show_variables
+            return 0
+            ;;
+        'calc')
+            license=
+            if test ! -e "${LICENSE_FILE}"; then
+                echo >&2 "error: Can't find license file."
+                return 1
+            fi
+            for l in $(license_list); do
+                if license--"${l}" check "${LICENSE_FILE}"; then
+                    license="${l}"
+                    break
+                fi
+            done
+            if test ! -n "${license}"; then
+                echo >&2 "error: ${LICENSE_FILE}: Unknown license."
+                return 1
+            fi
+            ;;
+        *)
+            license="${1}"
+            if ! which license--"${1}" >/dev/null 2>&1; then
+                echo >&2 "error: ${mit}: License not found."
+                return 1
+            fi
+            ;;
+    esac
+    shift
+    
+    ## Operations.
+    case "${1}" in
+        '')    cat <<-EOF
+		notes  : Links to bug reports and feature requests.
+		shell  : Print shell script header.
+		file   : Print LICENSE file.
+		long   : Print long header ([lL]:).
+		short  : Print short header (l:).
+		update : Update ${LICENSE_FILE} file.
+		EOF
+               ;;
+        show)  echo "${license}" ;;
+        notes)  license--"${license}" notes;;
+        shell)  license--"${license}" long | sed 's|^|\#|';;
+        file)   license--"${license}" long | sed 's|^[lLT]: \{0,2\}||';;
+        long)   license--"${license}" long | sed 's|^[lL]: \{0,2\}||' ;;
+        short)  license--"${license}" long | sed -n 's|^l: \{0,2\}||p';;
+        update)
+            echo "Updating ${LICENSE_FILE} with ${license} license ..."
+            license--"${license}" long | sed 's|^[lLT]: \{0,2\}||' > "${LICENSE_FILE}"
+            ;;
+    esac
+}
+license_show_variables() {
+    cat <<-EOF
+	LICENSE_YEAR       : ${LICENSE_YEAR}
+	LICENSE_COPYRIGHT  : ${LICENSE_COPYRIGHT}
+	LICENSE_LINKS      : ${LICENSE_LINKS}
+	LICENSE_DONATIONS  : ${LICENSE_DONATIONS}
+	LICENSE_GREP_OWNED : ${LICENSE_GREP_OWNED}
+	LICENSE_FILE       : ${LICENSE_FILE}
+	EOF
+}
+license_calc_variables() {
+    LICENSE_YEAR="${LICENSE_YEAR:-$(date +%Y)}"
+    if test -f LICENSE; then
+        LICENSE_FILE="LICENSE"
+    elif test -f COPYING; then
+        LICENSE_FILE="COPYING"
+    else
+        LICENSE_FILE="LICENSE"
+    fi
+}
+license_list() {
+    local IFS="${SEP:-:}" d
+    for d in ${PATH}; do
+        if test -d "${d}"; then
+            find ${d}                    \
+                 -maxdepth 1 -mindepth 1 \
+                 -type f                 \
+                 -executable             \
+                 -iname 'license--*'
+        fi
+    done | sed 's|^.*/license--||' | sort -u
+}
+## -------------------------------------------------------------------
+## ---- HELPER FUNCTIONS FOR license--NAME SCRIPTS -------------------
+## -------------------------------------------------------------------
+license_print_links() {
+    local n=1 u
+    for u in ${LICENSE_LINKS}; do
+        echo "${n}. [${u}](${u})"
+        n=$(( n + 1))
+    done
+}
+license_require() {
+    local v r=0
+    for v in "$@"; do
+        if eval 'test ! -n "${'"${v}"'}"'; then
+            echo >&2 "error: Variable ${v} not found."
+            r=1
+        fi
+    done
+    return "$r"
+}
+## -------------------------------------------------------------------
+license_calc_variables
+if test @"$(basename "$0")" = @"license";then
+    case "${1}" in
+        -h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0" ;;
+        *)         license "$@"; exit 0;;
+    esac
+fi

@@ -1,0 +1,41 @@
+#!/bin/sh -e
+##:
+#h: Usage: find-h-print-licenses DIR FIND-ARGS...
+##:
+find_h_print_licenses() {
+    local file lines copyright hash
+    local tmp="$(mktemp)" dir="$1"
+    
+    if test ! -d "${dir}"; then
+        echo >&2 "error: Please specify a directory."
+        return 1
+    fi
+    shift
+    
+    find "${dir}" -type f "$@" | while read -r file; do
+        sed -n '
+            :start
+            /\#[lL]: *$/{n;b start;}
+            /\#[lL]: [^:]*: *[^:]*$/{n;b start;}
+
+            s/^\#[lL]: \{0,2\}//p
+            20q
+        ' "${file}" | tr -d '\r' > "${tmp}"
+        lines="$(stat -c %s "${tmp}")"
+        if test @"${lines}" = @"0"; then
+            printf '%-30s : %-6s :\n' "${file}" ''
+            continue
+        fi
+        copyright="$(grep '[Cc]opyright.*[0-9][0-9][0-9][0-9]' "${tmp}" | head -n 1)"
+        hash="$(md5sum "${tmp}" | head -c 6)"
+        printf '%-30s : %-6s : %s\n' "${file}" "${hash}" "${copyright}"
+    done
+    
+    rm -f "${tmp}"
+}
+if test @"$(basename "$0")" = @"find-h-print-licenses";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0"  ;;
+        *)            find_h_print_licenses "$@"; exit 0 ;;
+    esac
+fi
