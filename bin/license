@@ -38,14 +38,14 @@ license() {
                 fi
             done
             if test ! -n "${license}"; then
-                echo >&2 "error: ${LICENSE_FILE}: Unknown license."
+                echo >&2 "error: ${license}: Unknown license."
                 return 1
             fi
             ;;
         *)
             license="${1}"
             if ! which license--"${1}" >/dev/null 2>&1; then
-                echo >&2 "error: ${mit}: License not found."
+                echo >&2 "error: ${license}: License not found."
                 return 1
             fi
             ;;

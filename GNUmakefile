@@ -9,10 +9,7 @@ install:
 install: install-license
 install-license: 
 	mkdir -p $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
-	cp LICENSE README.md $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
-update: update-license
-update-license:
-	ssnip README.md
+	cp LICENSE  $(DESTDIR)$(PREFIX)/share/doc/$(PROJECT)
 ## -- BLOCK:license --
 ## -- BLOCK:sh --
 install: install-sh
@@ -21,4 +18,5 @@ install-sh:
 	cp bin/find-h-print-licenses $(DESTDIR)$(PREFIX)/bin
 	cp bin/license--mit     $(DESTDIR)$(PREFIX)/bin
 	cp bin/license          $(DESTDIR)$(PREFIX)/bin
+	cp bin/find-h-readme    $(DESTDIR)$(PREFIX)/bin
 ## -- BLOCK:sh --
