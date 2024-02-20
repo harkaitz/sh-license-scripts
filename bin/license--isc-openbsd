@@ -1,0 +1,45 @@
+#!/bin/sh -e
+##:
+#h: Usage: license--isc-openbsd long|notes|check FILE
+##:
+. license
+license_isc_openbsd() {
+    license_require LICENSE_YEAR LICENSE_COPYRIGHT
+    case "$1" in
+        check)
+            grep -q 'Permission to use, copy, modify, and distribute this software for any' "$2";;
+        long)
+            cat <<-EOF
+		l: Copyright (c) ${LICENSE_YEAR} ${LICENSE_COPYRIGHT}
+		L: 
+		L: Permission to use, copy, modify, and distribute this software for any
+		L: purpose with or without fee is hereby granted, provided that the above
+		L: copyright notice and this permission notice appear in all copies.
+		L: 
+		L: THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+		L: WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+		L: MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+		L: ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+		L: WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+		L: ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+		L: OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+		EOF
+            ;;
+        notes)
+            cat <<-EOF
+		
+		For making bug reports, feature requests and donations visit
+		one of the following links:
+		
+		$(license_print_links)
+		
+		EOF
+            ;;
+    esac
+}
+if test @"$(basename "$0")" = @"license--isc-openbsd";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            license_isc_openbsd "$@"; exit 0;;
+    esac
+fi

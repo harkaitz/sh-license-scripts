@@ -1,0 +1,51 @@
+#!/bin/sh -e
+##:
+#h: Usage: license--gplv2 long|notes|check FILE
+##:
+. license
+license_gplv2() {
+    license_require LICENSE_YEAR LICENSE_COPYRIGHT
+    case "$1" in
+        check)
+            grep -q 'Version 2, June 1991' "$2"
+            ;;
+        long)
+            local tmp="${TEMP:-/tmp}/gpl-2.0.txt"
+            cat <<-EOF
+		L: --- Copyright and note on GPL versions
+		L:
+		l: Copyright (c) ${LICENSE_YEAR} ${LICENSE_COPYRIGHT}
+		L:
+		L: This program is distributed under version 2 of the General
+		L: Public License (included in its entirety, below).  Version 2
+		L: is the only version of this license which this version of the
+		L: program (or modified versions derived from this one) may be
+		L: distributed under.
+		L:
+		L: -----------------------------------------------------------------------
+		EOF
+            if test ! -e "${tmp}"; then
+                wget -q -O "${tmp}.tmp" "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"
+                mv "${tmp}.tmp" "${tmp}"
+            fi
+            sed 's|^|L:  |' "${tmp}"
+            ;;
+        notes)
+            cat <<-EOF
+		
+		For making bug reports, feature requests and donations visit
+		one of the following links:
+		
+		$(license_print_links)
+		
+		EOF
+            ;;
+    esac
+}
+## -------------------------------------------------------------------
+if test @"$(basename "$0")" = @"license--gplv2";then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            license_gplv2 "$@"; exit 0;;
+    esac
+fi

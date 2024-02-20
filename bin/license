@@ -2,7 +2,18 @@
 ##:
 #h: Usage: license [LICENSE|calc] [show|notes|shell|file|long|short|update]
 #h:        license owned
-#h:        license show 
+#h:        license show
+#h:
+#h: Calculate and create licenses from template "license--NAME" scripts.
+#h:
+#h: Calculation : license--NAME check FILE
+#h: Generation  : license--NAME long (With "lLT:" line prefixes)
+#h:               l: Show in help
+#h:               L: Put line in header.
+#h:               T: Put line only in the LICENSE file.
+#h:             : license-NAME notes : Print notes for the readme.
+#h:
+#h: Environment variables: LICENSE_YEAR, LICENSE_GREP_OWNED, PATH
 ##:
 license() {
     local l license
@@ -71,7 +82,14 @@ license() {
         short)  license--"${license}" long | sed -n 's|^l: \{0,2\}||p';;
         update)
             echo "Updating ${LICENSE_FILE} with ${license} license ..."
-            license--"${license}" long | sed 's|^[lLT]: \{0,2\}||' > "${LICENSE_FILE}"
+            if ! license--"${license}" long > "${LICENSE_FILE}.tmp"; then
+                sed 's|^[lLT]: \{0,2\}||' "${LICENSE_FILE}.tmp" > "${LICENSE_FILE}"
+                rm -f "${LICENSE_FILE}.tmp"
+                echo "error: Failed updating ${LICENSE_FILE}." >&2
+                return 1
+            else
+                mv "${LICENSE_FILE}.tmp" "${LICENSE_FILE}"
+            fi
             ;;
     esac
 }
@@ -96,7 +114,11 @@ license_calc_variables() {
     fi
 }
 license_list() {
-    local IFS="${SEP:-:}" d
+    local d
+    case "$(uname -s)" in
+        Windows_NT) local IFS=';';;
+        *)          local IFS=':';;
+    esac
     for d in ${PATH}; do
         if test -d "${d}"; then
             find ${d}                    \
