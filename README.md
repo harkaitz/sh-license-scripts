@@ -5,16 +5,6 @@ Scripts that help licensing software projects.
 
 ## Help
 
-find-h-print-licenses
-
-    Usage: find-h-print-licenses DIR FIND-ARGS...
-
-find-h-readme
-
-    Usage: find-h-license
-    
-    Print the current project's license file.
-
 license
 
     Usage: license [LICENSE|calc] [show|notes|shell|file|long|short|update]
@@ -48,30 +38,13 @@ license--isc-openbsd
 
     Usage: license--isc-openbsd long|notes|check FILE
 
+license--lgplv3
+
+    Usage: license--lgplv3 long|notes|check FILE
+
 license--mit
 
     Usage: license--mit long|notes|check FILE
-
-make-h-license
-
-    Usage: make-h-license ...
-    
-    ... get-license  : Get license file.
-    ... get-readme   : Get readme file.
-    ... makefile     : Print 'Makefile'.
-
-make-h-man
-
-    Usage: make-h-man
-    
-    Convert markdown files with "*.[NUM].md" format to man pages.
-    
-    ... mds        : List markdown files.
-    ... mans [NUM] : List man files.
-    
-    ... update    : Generate man pages from markdow files.
-    ... makefile  : Print makefile section (used by make-h) (for installation).
-    ... gitignore : Print gitignore section (used by make-h).
 
 ## Collaborating
 

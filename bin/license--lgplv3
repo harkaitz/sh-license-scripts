@@ -1,0 +1,37 @@
+#!/bin/sh -e
+##:
+#h: Usage: license--lgplv3 long|notes|check FILE
+##:
+. license
+license_lgplv3() {
+    license_require LICENSE_YEAR LICENSE_COPYRIGHT
+    case "$1" in
+        check)
+            grep -q 'Version 3, 29 June 2007' "$2"
+            ;;
+        long)
+            local tmp="${TEMP:-/tmp}/lgpl-3.0.txt"
+            if test ! -e "${tmp}"; then
+                wget -q -O "${tmp}.tmp" "https://www.gnu.org/licenses/lgpl-3.0.txt"
+                mv "${tmp}.tmp" "${tmp}"
+            fi
+            sed 's|^|L:  |' "${tmp}"
+            ;;
+        notes)
+            cat <<-EOF
+		
+		For making bug reports, feature requests and donations visit
+		one of the following links:
+		
+		$(license_print_links)
+		
+		EOF
+            ;;
+    esac
+}
+if test @"${SCRNAME:-$(basename "$0")}" = @"license--lgplv3"; then
+    case "${1}" in
+        ''|-h|--help) sed -n 's/^ *#h: \{0,1\}//p' "$0";;
+        *)            license_lgplv3 "$@"; exit 0;;
+    esac
+fi

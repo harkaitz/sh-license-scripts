@@ -83,12 +83,11 @@ license() {
         update)
             echo "Updating ${LICENSE_FILE} with ${license} license ..."
             if ! license--"${license}" long > "${LICENSE_FILE}.tmp"; then
-                sed 's|^[lLT]: \{0,2\}||' "${LICENSE_FILE}.tmp" > "${LICENSE_FILE}"
-                rm -f "${LICENSE_FILE}.tmp"
                 echo "error: Failed updating ${LICENSE_FILE}." >&2
                 return 1
             else
-                mv "${LICENSE_FILE}.tmp" "${LICENSE_FILE}"
+                sed 's|^[lLT]: \{0,2\}||' "${LICENSE_FILE}.tmp" > "${LICENSE_FILE}"
+                rm -f "${LICENSE_FILE}.tmp"
             fi
             ;;
     esac
